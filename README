@@ -1,0 +1,8 @@
+Experimental bad code
+
+* Needs cleanup
+* Poor use of async
+* Server calls are blocking
+* Nym uses long polling, there should be a message queue in API
+* Bad mix of multiple languages
+
