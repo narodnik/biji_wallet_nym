@@ -32,9 +32,21 @@ bcs::ec_secret new_key()
     return new_key(seed);
 }
 
+std::string convert_key_to_wif(const auto& secret)
+{
+    if (biji::is_testnet)
+    {
+        bcs::wallet::ec_private privat(
+            secret, bcs::wallet::ec_private::testnet);
+        return privat.encoded();
+    }
+
+    return bcs::wallet::ec_private(secret).encoded();
+}
+
 bcs::wallet::payment_address convert_key_to_address(const auto& secret)
 {
-    if (is_testnet)
+    if (biji::is_testnet)
     {
         bcs::wallet::ec_private privat(
             secret, bcs::wallet::ec_private::testnet);
@@ -139,7 +151,8 @@ using point_key_list = std::vector<point_key_tuple>;
 std::optional<point_key_list> select_outputs(const auto& keys, const auto value)
 {
     const auto addresses = convert_keys_to_addresses(keys);
-    const auto history_result = get_history(addresses);
+    const auto history_result = biji::get_history(
+        addresses, biji::blockchain_server_address);
     if (!history_result)
         return std::nullopt;
 
@@ -282,7 +295,7 @@ int main()
     std::vector<bcs::ec_secret> keys;
     load_keys(keys, "wallet.dat");
 
-    if (is_testnet)
+    if (biji::is_testnet)
     {
         std::cout << "Running on testnet" << std::endl;
 
@@ -300,7 +313,8 @@ int main()
         std::cout << "2. Receive addresses" << std::endl;
         std::cout << "3. Show history and balance" << std::endl;
         std::cout << "4. Send funds" << std::endl;
-        std::cout << "5. Exit" << std::endl;
+        std::cout << "5. Show wifs" << std::endl;
+        std::cout << "6. Exit" << std::endl;
 
         int choice = 0;
         std::cin >> choice;
@@ -321,7 +335,8 @@ int main()
         case 3:
         {
             const auto addresses = convert_keys_to_addresses(keys);
-            const auto result = get_history(addresses);
+            const auto result = biji::get_history(
+                addresses, biji::blockchain_server_address);
             if (!result)
                 break;
             display_history(*result);
@@ -342,6 +357,12 @@ int main()
             break;
         }
         case 5:
+        {
+            for (const auto& key: keys)
+                std::cout << convert_key_to_wif(key) << std::endl;
+            break;
+        }
+        case 6:
         {
             std::cout << "Saving wallet to wallet.dat" << std::endl;
             save_keys(keys, "wallet.dat");

@@ -17,9 +17,9 @@ void broadcast(const auto& tx)
     // Bound parameters.
     bcc::obelisk_client client(4000, 0);
 
-    std::cout << "Connecting to " << blockchain_server_address
+    std::cout << "Connecting to " << biji::blockchain_server_address
         << "..." << std::endl;
-    const auto endpoint = bcs::config::endpoint(blockchain_server_address);
+    const auto endpoint = bcs::config::endpoint(biji::blockchain_server_address);
 
     if (!client.connect(endpoint))
     {
